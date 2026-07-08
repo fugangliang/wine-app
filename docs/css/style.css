@@ -1,0 +1,104 @@
+/* Wine Log — モバイルファースト・ダークモード基調 */
+:root {
+  --bg: #16121a;
+  --card: #211b26;
+  --text: #ece6ee;
+  --muted: #9b8fa4;
+  --accent: #b0405c;
+  --accent-soft: #6e2b40;
+  --border: #372e3e;
+  --warn: #d9a441;
+  --fault: #c25050;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #faf7f8; --card: #ffffff; --text: #2b2230; --muted: #7d7185;
+    --accent: #98314d; --accent-soft: #e8ccd5; --border: #e2d8e0;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  font-size: 15px; line-height: 1.6;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+#app { max-width: 640px; margin: 0 auto; padding: 12px; }
+h2 { font-size: 1.05rem; margin: 14px 0 8px; }
+h3 { font-size: 0.95rem; margin: 0 0 8px; color: var(--accent); }
+h4, h5 { margin: 10px 0 4px; }
+a { color: var(--accent); text-decoration: none; }
+.muted { color: var(--muted); font-size: 0.85rem; }
+.warn { color: var(--warn); font-size: 0.85rem; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.row { display: flex; gap: 8px; }
+.row > * { flex: 1; min-width: 0; }
+label { display: block; font-size: 0.8rem; color: var(--muted); margin: 8px 0 2px; }
+label.check { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text); }
+input, select, textarea {
+  width: 100%; padding: 10px; margin: 2px 0 6px;
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px; font-size: 16px;
+}
+input[type="checkbox"] { width: auto; }
+textarea { resize: vertical; }
+
+button, .button {
+  display: inline-block; padding: 10px 14px; margin: 4px 0;
+  background: var(--card); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: 0.95rem; cursor: pointer; text-align: center;
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; width: 100%; }
+button.danger { color: var(--fault); border-color: var(--fault); }
+.actions { display: flex; flex-direction: column; gap: 4px; margin: 12px 0; }
+
+.nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; background: var(--card); border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom); z-index: 10;
+}
+.nav a { flex: 1; text-align: center; padding: 12px 0; color: var(--muted); font-size: 0.85rem; }
+.nav a.active { color: var(--accent); font-weight: 600; }
+
+.topbar { display: flex; align-items: center; gap: 10px; margin: 4px 0 10px; }
+.topbar h2 { margin: 0; flex: 1; }
+.topbar a { font-size: 1.3rem; }
+
+.list-item {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 8px; color: var(--text);
+}
+.li-title { font-weight: 600; }
+.li-sub { font-size: 0.8rem; color: var(--muted); }
+
+.badge {
+  display: inline-block; font-size: 0.7rem; padding: 1px 8px;
+  border-radius: 999px; background: var(--accent-soft); color: var(--text);
+}
+.badge.draft { background: var(--warn); color: #2b2230; }
+.badge.fault { background: var(--fault); color: #fff; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+.chip {
+  padding: 6px 12px; margin: 0; font-size: 0.85rem;
+  border-radius: 999px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text);
+}
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.sat-row { margin: 8px 0; }
+.sat-label { display: block; font-size: 0.75rem; color: var(--muted); text-transform: capitalize; margin-bottom: 2px; }
+
+.aroma details { margin: 4px 0; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+.aroma summary { cursor: pointer; font-size: 0.85rem; }
+.selected-aromas { margin: 4px 0 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+.dossier { font-size: 0.9rem; margin: 8px 0; overflow-wrap: break-word; }
+.dossier.fallback { border-left: 3px solid var(--warn); padding-left: 10px; }
+.dossier ul { margin: 4px 0; padding-left: 18px; }
+details summary { color: var(--muted); font-size: 0.85rem; cursor: pointer; }
+details ul { font-size: 0.75rem; word-break: break-all; }
