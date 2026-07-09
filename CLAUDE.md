@@ -20,7 +20,13 @@
 - 動作確認: `cd docs && python3 -m http.server 8000`。
 - 確定事項が増えたら本ファイルに追記して git commit（workspace の last-session.md 代替）。
 
+## 公開状況（2026-07-09）
+- GitHub: https://github.com/fugangliang/wine-app（public・main の /docs をPages配信）
+- アプリURL: https://fugangliang.github.io/wine-app/
+- UIスモークテスト 23項目 ALL PASS（test/smoke.mjs・要 puppeteer-core + Chrome）。本番URLでも描画/SW登録/無エラー確認済み。
+- **API疎通（ドシエ生成・Visionリスト読取）は未確認**: RFのAPIキー入力後に実機で要確認。
+
 ## 残タスク / 未確定
-- GitHub Pages 公開（リポジトリ未作成。公開時は Settings→Pages→/docs）。
+- RF実機での初期設定（APIキー入力）とドシエ生成・リスト読取の実地確認。
 - ホワイトリストの輸入元ドメインは暫定（enoteca.co.jp / fwines.co.jp / luc-corp.co.jp / jeroboam.co.jp / mottox.co.jp）。RFの取引先に合わせて設定画面で調整可。
 - v2候補（統計: フォールト発生率・産地/品種分布）はデータ構造対応済み・UI未実装。
