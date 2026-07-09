@@ -22,9 +22,19 @@ body {
   background: var(--bg); color: var(--text);
   font-family: -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
   font-size: 15px; line-height: 1.6;
+  padding-top: env(safe-area-inset-top);
   padding-bottom: calc(64px + env(safe-area-inset-bottom));
 }
-#app { max-width: 640px; margin: 0 auto; padding: 12px; }
+/* ステータスバー（ノッチ）領域の背景: スクロール時にコンテンツが時計等と重なって見えないように常時マスク */
+body::before {
+  content: ""; position: fixed; top: 0; left: 0; right: 0;
+  height: env(safe-area-inset-top);
+  background: var(--bg); z-index: 30;
+}
+#app {
+  max-width: 640px; margin: 0 auto;
+  padding: 12px calc(12px + env(safe-area-inset-right)) 12px calc(12px + env(safe-area-inset-left));
+}
 h2 { font-size: 1.05rem; margin: 14px 0 8px; }
 h3 { font-size: 0.95rem; margin: 0 0 8px; color: var(--accent); }
 h4, h5 { margin: 10px 0 4px; }
