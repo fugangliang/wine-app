@@ -144,6 +144,38 @@ try {
   await sleep(500);
   ok("設定の永続化（英語キー併記ON）", await page.$eval("#set-showen", (el) => el.checked));
 
+  // 12b. チャット連携: ドシエJSON取り込み
+  const dossierJSON = JSON.stringify({
+    format: "wine-dossier-v1", name: "Latricières-Chambertin Test", producer: "Dom. Test",
+    region: "Gevrey-Chambertin", variety: "Pinot Noir", type: "red", vintage: "2019",
+    sources: ["https://example.com/tech-sheet"],
+    text: "## 生産者プロファイル\n全房比率: 30%\n新樽比率: 不明",
+  });
+  await page.evaluate((j) => { document.querySelector("#chat-json").value = j; }, dossierJSON);
+  await page.click('[data-action="chat-import"]');
+  await sleep(300);
+  ok("ドシエJSON取り込み→件数表示", (await page.$eval("#chat-import-status", (el) => el.textContent)).includes("1件"));
+  await sleep(900); // 自動遷移待ち
+  html = await page.content();
+  ok("取り込み後ワイン詳細に遷移", (await page.url()).includes("#/wine/"));
+  ok("ドシエ本文・信頼度ラベル表示", html.includes("全房比率") && html.includes("チャット生成"));
+  ok("出典リンク表示", html.includes("example.com/tech-sheet"));
+
+  // 12c. チャット連携: リストJSON取り込み（読取タブ）
+  await page.goto(BASE + "#/scan", { waitUntil: "networkidle0" });
+  await sleep(400);
+  await page.evaluate(() => { document.querySelector("details").open = true; });
+  const listJSON = JSON.stringify({ format: "wine-list-v1", items: [
+    { name: "Test Riesling Kabinett", producer: "Wg. Test", vintage: "2022", price: 6800 },
+    { name: "Test Barolo", producer: null, vintage: "2018", price: null },
+  ]});
+  await page.evaluate((j) => { document.querySelector("#scan-json").value = j; }, listJSON);
+  await page.click('[data-action="scan-json"]');
+  await sleep(300);
+  const scanHtml = await page.$eval("#scan-results", (el) => el.innerHTML);
+  ok("リストJSON取り込み→2件表示", scanHtml.includes("Test Riesling Kabinett") && scanHtml.includes("Test Barolo"));
+  ok("行アクション（照会/記録/セラー）表示", scanHtml.includes("記録作成") && scanHtml.includes("セラー追加"));
+
   // 13. Service Worker登録
   const swReg = await page.evaluate(async () => !!(await navigator.serviceWorker.getRegistration()));
   ok("Service Worker登録", swReg);

@@ -20,13 +20,20 @@
 - 動作確認: `cd docs && python3 -m http.server 8000`。
 - 確定事項が増えたら本ファイルに追記して git commit（workspace の last-session.md 代替）。
 
+## 照会の2方式（2026-07-09確定）
+- **チャット連携（主運用）**: Claude.aiプロジェクト（指示書=`chat-project-instructions.md`）で生成したJSONを
+  アプリに貼り付けて取り込む。追加課金なし。取り込み形式は `wine-dossier-v1`（設定タブ）と `wine-list-v1`（読取タブ/設定タブ）。
+  ホワイトリストは指示書ベースのベストエフォート（APIの `allowed_domains` のような強制はない）。
+- **API直接（併存）**: api.js の3ステップ検索。APIキー入力時のみ有効。従量課金。
+- 取り込みスキーマを変えるときは `chat-project-instructions.md` と app.js の importDossiers / scanJSONImport を必ず同時に更新する。
+
 ## 公開状況（2026-07-09）
 - GitHub: https://github.com/fugangliang/wine-app（public・main の /docs をPages配信）
 - アプリURL: https://fugangliang.github.io/wine-app/
-- UIスモークテスト 23項目 ALL PASS（test/smoke.mjs・要 puppeteer-core + Chrome）。本番URLでも描画/SW登録/無エラー確認済み。
-- **API疎通（ドシエ生成・Visionリスト読取）は未確認**: RFのAPIキー入力後に実機で要確認。
+- UIスモークテスト 29項目 ALL PASS（test/smoke.mjs・要 puppeteer-core + Chrome。チャット取り込み含む）。本番URLでも描画/SW登録/無エラー確認済み。
+- **API直接方式の疎通（ドシエ生成・Visionリスト読取）は未確認**: 主運用はチャット連携のため必須ではない。
 
 ## 残タスク / 未確定
-- RF実機での初期設定（APIキー入力）とドシエ生成・リスト読取の実地確認。
+- RFがClaude.aiにプロジェクト「ワインドシエ」を作成し指示書を貼る → 実際に1本ドシエ生成→取り込みを試す。
 - ホワイトリストの輸入元ドメインは暫定（enoteca.co.jp / fwines.co.jp / luc-corp.co.jp / jeroboam.co.jp / mottox.co.jp）。RFの取引先に合わせて設定画面で調整可。
 - v2候補（統計: フォールト発生率・産地/品種分布）はデータ構造対応済み・UI未実装。

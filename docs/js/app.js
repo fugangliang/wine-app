@@ -534,6 +534,12 @@ async function viewScan() {
       <input type="file" id="scan-file" accept="image/*" capture="environment">
       <button class="primary" data-action="scan">読み取り</button>
       <p id="scan-status" class="muted"></p>
+      <details>
+        <summary>チャットからJSON取り込み（APIキー不要）</summary>
+        <p class="muted">Claude.aiチャットに写真を貼って抽出したJSON（wine-list-v1）を貼り付け。</p>
+        <textarea id="scan-json" rows="3" placeholder='{"format":"wine-list-v1","items":[...]}'></textarea>
+        <button data-action="scan-json">取り込み</button>
+      </details>
     </section>
     <section id="scan-results">${renderScanResults()}</section>`;
 }
@@ -620,6 +626,13 @@ async function viewSettings() {
       ${["tier1", "tier2", "tier3", "tier4"].map((t) => `<label>${t.toUpperCase()}<textarea id="set-${t}" rows="2">${esc((S.whitelist[t] || []).join("\n"))}</textarea></label>`).join("")}
     </section>
     <section class="card">
+      <h2>チャット連携取り込み（APIキー不要）</h2>
+      <p class="muted">Claude.aiチャット（指示書プロジェクト）が出力したJSONを貼り付け。wine-dossier-v1（ドシエ）/ wine-list-v1（リスト読取）対応。</p>
+      <textarea id="chat-json" rows="5" placeholder='{"format":"wine-dossier-v1", "name":"...", "text":"..."}'></textarea>
+      <button class="primary" data-action="chat-import">取り込み</button>
+      <p id="chat-import-status" class="muted"></p>
+    </section>
+    <section class="card">
       <h2>データ</h2>
       <div class="row">
         <button data-action="export">JSONエクスポート</button>
@@ -649,6 +662,65 @@ async function settingsSave() {
   await loadSettings();
   alert("保存しました");
   render();
+}
+
+// ---- チャット連携取り込み（wine-dossier-v1 / wine-list-v1）----
+function parseChatJSON(raw) {
+  try { return JSON.parse(raw); } catch {
+    const m = raw.match(/\{[\s\S]*\}|\[[\s\S]*\]/); // コードフェンス等に埋まっていても救済
+    if (!m) throw new Error("JSONとして解釈できません");
+    return JSON.parse(m[0]);
+  }
+}
+
+async function importDossiers(items) {
+  const done = [];
+  for (const d of items) {
+    if (d.format !== "wine-dossier-v1" || !d.name || !d.text) {
+      throw new Error("wine-dossier-v1 形式ではありません（format / name / text が必須）");
+    }
+    const wine = await findOrCreateWine(d.name, { producer: d.producer });
+    if (!wine.producer && d.producer) wine.producer = d.producer;
+    if (!wine.region && d.region) wine.region = d.region;
+    if (!wine.variety && d.variety) wine.variety = d.variety;
+    if (!wine.type && d.type) wine.type = d.type;
+    wine.dossier = {
+      text: d.text,
+      sources: d.sources || [],
+      generated_at: new Date().toISOString(),
+      confidence: d.confidence || "チャット生成（Tier方針ベストエフォート）",
+      official_domain: null,
+      vintage: d.vintage != null ? String(d.vintage) : null,
+      fallback_text: null,
+    };
+    await db.put("wines", wine);
+    done.push(wine);
+  }
+  return done;
+}
+
+async function chatImport() {
+  const raw = $("#chat-json").value.trim();
+  if (!raw) return alert("JSONを貼り付けてください");
+  const data = parseChatJSON(raw);
+  if (!Array.isArray(data) && data.format === "wine-list-v1") {
+    scanResults = data.items || [];
+    location.hash = "#/scan";
+    return;
+  }
+  const done = await importDossiers(Array.isArray(data) ? data : [data]);
+  $("#chat-import-status").textContent = `${done.length}件取り込みました: ${done.map((w) => w.name).join(", ")}`;
+  if (done.length === 1) setTimeout(() => { location.hash = `#/wine/${done[0].id}`; }, 600);
+}
+
+function scanJSONImport() {
+  const raw = $("#scan-json").value.trim();
+  if (!raw) return alert("JSONを貼り付けてください");
+  const data = parseChatJSON(raw);
+  const items = Array.isArray(data) ? data : data.format === "wine-list-v1" ? data.items : null;
+  if (!items) throw new Error("wine-list-v1 形式ではありません");
+  scanResults = items;
+  $("#scan-results").innerHTML = renderScanResults();
 }
 
 async function exportJSON() {
@@ -740,6 +812,8 @@ document.addEventListener("click", async (e) => {
     else if (a === "scan-dossier") await scanAction("dossier", +el.dataset.i);
     else if (a === "scan-record") await scanAction("record", +el.dataset.i);
     else if (a === "scan-cellar") await scanAction("cellar", +el.dataset.i);
+    else if (a === "chat-import") await chatImport();
+    else if (a === "scan-json") scanJSONImport();
     else if (a === "settings-save") await settingsSave();
     else if (a === "export") await exportJSON();
     else if (a === "import") {
