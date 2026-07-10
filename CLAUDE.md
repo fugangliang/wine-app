@@ -30,13 +30,23 @@
 ## 公開状況（2026-07-09）
 - GitHub: https://github.com/fugangliang/wine-app（public・main の /docs をPages配信）
 - アプリURL: https://fugangliang.github.io/wine-app/
-- UIスモークテスト 29項目 ALL PASS（test/smoke.mjs・要 puppeteer-core + Chrome。チャット取り込み含む）。本番URLでも描画/SW登録/無エラー確認済み。
+- UIスモークテスト 34項目 ALL PASS（test/smoke.mjs・要 puppeteer-core + Chrome。チャット取り込み・ワイン一覧・版数表示含む）。本番URLでも描画/SW登録/無エラー確認済み。
 - **API直接方式の疎通（ドシエ生成・Visionリスト読取）は未確認**: 主運用はチャット連携のため必須ではない。
 
-## 残タスク / 未確定
-- RFがClaude.aiにプロジェクト「ワインドシエ」を作成し指示書を貼る → 実際に1本ドシエ生成→取り込みを試す。
+## 運用フェーズ（2026-07-10移行・現行版 v2026-07-10.1）
+- RFのiPhone実機で確認済み: ホーム画面追加、セーフエリア表示、チャット連携ドシエ取り込み、ワイン・ドシエ一覧、版数表示。
+- 日常運用はアプリ+Claude.aiチャットのみで完結する。Claude Codeの出番は不具合修正・機能追加時のみ。
+
+### セッション再開手順（Claude Code向け）
+1. 本ファイルと `requirements_v0.3.md`（仕様の正）を読む。
+2. `git log --oneline -10` で最終状態を確認（本PJの作業履歴はコミットログが正）。
+3. 修正後は「リリース手順」（下記）に従い、必ずスモークテスト→commit→push→Pages反映確認→版数をRFに伝える。
+4. RF側の更新確認: アプリ完全終了→開き直し→設定タブ最下部の版数。
+
+## 残タスク / 未確定（優先度低・運用しながら判断）
 - ホワイトリストの輸入元ドメインは暫定（enoteca.co.jp / fwines.co.jp / luc-corp.co.jp / jeroboam.co.jp / mottox.co.jp）。RFの取引先に合わせて設定画面で調整可。
-- v2候補（統計: フォールト発生率・産地/品種分布）はデータ構造対応済み・UI未実装。
+- v2候補（統計: フォールト発生率・産地/品種分布）はデータ構造対応済み・UI未実装。記録が溜まってから着手判断。
+- API直接方式（従量課金）は温存。ワンタップ照会が欲しくなったらAPIキー入力のみで有効化。
 
 ## リリース手順（2026-07-10確定）
 1. app.js の APP_VERSION / APP_VERSION_NOTE を更新（日付ベース: vYYYY-MM-DD.n）
