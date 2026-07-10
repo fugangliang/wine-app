@@ -57,26 +57,17 @@ async function render() {
 }
 
 // =====================================================================
-// ホーム（記録一覧 + クイック入力）(§4.4)
+// ホーム（記録一覧 + ワイン・ドシエ一覧 + クイック入力）(§4.4)
 // =====================================================================
+let homeTab = "records"; // "records" | "wines"
+
 async function viewHome() {
-  const [tastings, wines] = await Promise.all([db.all("tastings"), db.all("wines")]);
+  const [tastings, wines, cellar] = await Promise.all([db.all("tastings"), db.all("wines"), db.all("cellar")]);
   const wmap = Object.fromEntries(wines.map((w) => [w.id, w]));
   tastings.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 
-  app().innerHTML = `
-    <section class="card">
-      <h2>クイック入力</h2>
-      <input id="q-name" list="wine-names" placeholder="ワイン名（必須・これだけで保存可）">
-      <datalist id="wine-names">${wines.map((w) => `<option value="${esc(w.name)}">`).join("")}</datalist>
-      <div class="row">
-        <input id="q-place" placeholder="場所・店名（任意）">
-        <input id="q-memo" placeholder="一言メモ（任意）">
-      </div>
-      <button class="primary" data-action="quick-save">保存（下書き）</button>
-    </section>
+  const recordsHtml = `
     <section>
-      <h2>テイスティング記録</h2>
       ${tastings.length === 0 ? '<p class="muted">記録はまだありません。</p>' : ""}
       ${tastings.map((t) => {
         const w = wmap[t.wine_id];
@@ -90,6 +81,57 @@ async function viewHome() {
         </a>`;
       }).join("")}
     </section>`;
+
+  const countT = {};
+  for (const t of tastings) countT[t.wine_id] = (countT[t.wine_id] || 0) + 1;
+  const countC = {};
+  for (const c of cellar) countC[c.wine_id] = (countC[c.wine_id] || 0) + (c.count || 0);
+  const winesSorted = [...wines].sort((a, b) => (b.dossier?.generated_at || b.created_at || "").localeCompare(a.dossier?.generated_at || a.created_at || ""));
+
+  const winesHtml = `
+    <section>
+      <input id="wine-filter" placeholder="銘柄・生産者で絞り込み" autocomplete="off">
+      <div id="wine-list">
+      ${wines.length === 0 ? '<p class="muted">ワインはまだありません。</p>' : ""}
+      ${winesSorted.map((w) => `
+        <a class="list-item wine-row" href="#/wine/${w.id}" data-filter="${esc(((w.name || "") + " " + (w.producer || "")).toLowerCase())}">
+          <div>
+            <div class="li-title">${esc(w.name)}</div>
+            <div class="li-sub">${[w.producer, w.region].filter(Boolean).map(esc).join(" ・ ")}</div>
+          </div>
+          <div class="li-badges">
+            ${w.dossier ? '<span class="badge">ドシエ</span>' : ""}
+            ${countT[w.id] ? `<span class="badge">記録${countT[w.id]}</span>` : ""}
+            ${countC[w.id] ? `<span class="badge">在庫${countC[w.id]}</span>` : ""}
+          </div>
+        </a>`).join("")}
+      </div>
+    </section>`;
+
+  app().innerHTML = `
+    <section class="card">
+      <h2>クイック入力</h2>
+      <input id="q-name" list="wine-names" placeholder="ワイン名（必須・これだけで保存可）">
+      <datalist id="wine-names">${wines.map((w) => `<option value="${esc(w.name)}">`).join("")}</datalist>
+      <div class="row">
+        <input id="q-place" placeholder="場所・店名（任意）">
+        <input id="q-memo" placeholder="一言メモ（任意）">
+      </div>
+      <button class="primary" data-action="quick-save">保存（下書き）</button>
+    </section>
+    <div class="chips seg">
+      <button class="chip ${homeTab === "records" ? "on" : ""}" data-action="home-tab" data-tab="records">記録 (${tastings.length})</button>
+      <button class="chip ${homeTab === "wines" ? "on" : ""}" data-action="home-tab" data-tab="wines">ワイン・ドシエ (${wines.length})</button>
+    </div>
+    ${homeTab === "records" ? recordsHtml : winesHtml}`;
+
+  const filter = $("#wine-filter");
+  if (filter) filter.addEventListener("input", () => {
+    const q = filter.value.trim().toLowerCase();
+    document.querySelectorAll(".wine-row").forEach((el) => {
+      el.style.display = !q || el.dataset.filter.includes(q) ? "" : "none";
+    });
+  });
 }
 
 async function quickSave() {
@@ -742,6 +784,7 @@ document.addEventListener("click", async (e) => {
   const a = el.dataset.action;
   try {
     if (a === "quick-save") await quickSave();
+    else if (a === "home-tab") { homeTab = el.dataset.tab; await viewHome(); }
     else if (a === "chip") {
       const field = el.dataset.field, value = el.dataset.value;
       if (field === "wine-type") {

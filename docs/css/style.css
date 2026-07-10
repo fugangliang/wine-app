@@ -100,6 +100,9 @@ button.danger { color: var(--fault); border-color: var(--fault); }
 }
 .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 
+.seg { margin: 12px 0 8px; }
+.li-badges { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; flex-shrink: 0; }
+
 .sat-row { margin: 8px 0; }
 .sat-label { display: block; font-size: 0.75rem; color: var(--muted); text-transform: capitalize; margin-bottom: 2px; }
 

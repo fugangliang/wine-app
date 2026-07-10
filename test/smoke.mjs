@@ -161,6 +161,22 @@ try {
   ok("ドシエ本文・信頼度ラベル表示", html.includes("全房比率") && html.includes("チャット生成"));
   ok("出典リンク表示", html.includes("example.com/tech-sheet"));
 
+  // 12b-2. ホーム「ワイン・ドシエ」タブ: 記録のない銘柄（ドシエのみ）に到達できる
+  await page.goto(BASE + "#/", { waitUntil: "networkidle0" });
+  await sleep(400);
+  await page.click('[data-action="home-tab"][data-tab="wines"]');
+  await sleep(400);
+  let wineListHtml = await page.$eval("#wine-list", (el) => el.innerHTML);
+  ok("ワイン一覧に取り込み銘柄が表示", wineListHtml.includes("Latricières-Chambertin Test"));
+  ok("ドシエバッジ表示", /Latricières-Chambertin Test[\s\S]*?badge">ドシエ/.test(wineListHtml));
+  await page.type("#wine-filter", "latric");
+  await sleep(300);
+  const visible = await page.$$eval(".wine-row", (els) => els.filter((e) => e.style.display !== "none").map((e) => e.textContent));
+  ok("絞り込みフィルタ動作", visible.length === 1 && visible[0].includes("Latricières"));
+  await page.click(".wine-row");
+  await sleep(500);
+  ok("一覧→ワイン詳細（ドシエ閲覧）遷移", (await page.url()).includes("#/wine/") && (await page.content()).includes("全房比率"));
+
   // 12c. チャット連携: リストJSON取り込み（読取タブ）
   await page.goto(BASE + "#/scan", { waitUntil: "networkidle0" });
   await sleep(400);
