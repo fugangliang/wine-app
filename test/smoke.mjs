@@ -143,6 +143,7 @@ try {
   await page.reload({ waitUntil: "networkidle0" });
   await sleep(500);
   ok("設定の永続化（英語キー併記ON）", await page.$eval("#set-showen", (el) => el.checked));
+  ok("バージョン表示", (await page.content()).includes("v2026-07-10.1"));
 
   // 12b. チャット連携: ドシエJSON取り込み
   const dossierJSON = JSON.stringify({

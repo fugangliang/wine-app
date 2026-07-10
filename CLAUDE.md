@@ -37,3 +37,9 @@
 - RFがClaude.aiにプロジェクト「ワインドシエ」を作成し指示書を貼る → 実際に1本ドシエ生成→取り込みを試す。
 - ホワイトリストの輸入元ドメインは暫定（enoteca.co.jp / fwines.co.jp / luc-corp.co.jp / jeroboam.co.jp / mottox.co.jp）。RFの取引先に合わせて設定画面で調整可。
 - v2候補（統計: フォールト発生率・産地/品種分布）はデータ構造対応済み・UI未実装。
+
+## リリース手順（2026-07-10確定）
+1. app.js の APP_VERSION / APP_VERSION_NOTE を更新（日付ベース: vYYYY-MM-DD.n）
+2. sw.js の CACHE を同じ版数に更新（旧キャッシュはactivate時に自動削除）
+3. スモークテスト実行 → commit → push（Pagesに1〜2分で反映）
+- ユーザー側の更新確認は「設定タブ最下部の版数表示」。

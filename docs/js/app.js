@@ -8,6 +8,10 @@ import * as api from "./api.js";
 const $ = (sel) => document.querySelector(sel);
 const app = () => $("#app");
 
+// リリースごとに更新する（sw.js の CACHE も同時に上げる）
+export const APP_VERSION = "v2026-07-10.1";
+const APP_VERSION_NOTE = "バージョン表示追加・ワイン/ドシエ一覧タブ";
+
 // ---- 設定キャッシュ ----
 const S = { dict: { ...DICT_JA }, showEn: false, autoFallback: true, whitelist: api.DEFAULT_WHITELIST, aromaFreq: {} };
 
@@ -682,7 +686,8 @@ async function viewSettings() {
       </div>
       <input type="file" id="import-file" accept=".json" style="display:none">
     </section>
-    <button class="primary" data-action="settings-save">設定を保存</button>`;
+    <button class="primary" data-action="settings-save">設定を保存</button>
+    <p class="muted" style="text-align:center">Wine Log ${esc(APP_VERSION)}<br>${esc(APP_VERSION_NOTE)}</p>`;
 }
 
 async function settingsSave() {

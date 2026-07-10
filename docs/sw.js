@@ -1,5 +1,5 @@
 // Service Worker — アプリシェルをキャッシュ（記録・閲覧・検索はオフライン可）
-const CACHE = "wine-app-v1";
+const CACHE = "wine-app-v2026-07-10.1";
 const SHELL = [
   "./",
   "./index.html",
